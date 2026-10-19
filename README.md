@@ -48,7 +48,7 @@ This updates the app only. Update Cairn itself with `cairn upgrade`.
 
 ## Using it
 
-Click the **stacked squares** in the menu bar:
+Click the **stacked stones** in the menu bar:
 
 ```
 Local: Running · v0.1.0
