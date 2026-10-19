@@ -60,9 +60,9 @@ Open Local UI
 Open Team UI
 Restart Local Server
 Stop Local Server
-Start Local Server at Login     ✓
 Push Git Mirror Now
 Open Server Log
+Update Server and CLI
 ```
 
 - **Local** and **Team** always show. One you haven't set up says **Not configured**; set it up
@@ -71,8 +71,10 @@ Open Server Log
   Items…** appears), or that something else holds its port.
 - **Team** can also say **Unreachable** or **API key rejected**.
 - **Open Local UI** and **Open Team UI** open the web UI, already logged in, like `cairn ui`.
-- **Start Local Server at Login** installs or removes the login service (`cairn service install`
-  or `uninstall`). Start, Stop, and Restart run `cairn service start`, `stop`, and `restart`.
+- **Restart**, **Stop**, and **Start Local Server** run `cairn service restart`, `stop`, and `start`.
+  A stopped server starts again with the next agent session, or at login.
+- **Update Server and CLI** runs `cairn upgrade`: the CLI and the local server are one package,
+  so it updates both and restarts the server. The menu's **Update Cairn** updates this app.
 - **Push Git Mirror Now** shows when git mode is on (`cairn git enable`).
 - The icon dims while a store you've set up can't be reached.
 - If the `cairn` command isn't installed, the menu offers **Copy Install Command** instead.
@@ -99,7 +101,8 @@ itself alone: the local server keeps running. To remove that too, run `cairn uni
 ## Troubleshooting
 
 **Local says Not running.** Check `cairn service status` and the server log (**Open Server Log**,
-or `~/.cairn/logs/server.log`).
+or `~/.cairn/logs/server.log`). The login service itself is managed with `cairn service install`
+and `cairn service uninstall`.
 
 **Local says Blocked in Login Items.** The server was switched off under System Settings →
 General → Login Items & Extensions → Allow in the Background, where it's listed as `cairn`.

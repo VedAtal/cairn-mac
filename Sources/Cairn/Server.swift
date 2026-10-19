@@ -54,9 +54,9 @@ enum CLI {
         return candidates.compactMap { $0 }.first { FileManager.default.isExecutableFile(atPath: $0) }
     }
 
-    /// Runs `cairn <args>` off the main thread. Returns nil on success, else what went wrong.
-    static func run(_ args: [String]) async -> String? {
-        guard let path else { return "The cairn command isn't installed." }
+    /// Runs `cairn <args>` off the main thread, returning whether it worked and what it printed.
+    static func run(_ args: [String]) async -> (ok: Bool, output: String) {
+        guard let path else { return (false, "The cairn command isn't installed.") }
         return await withCheckedContinuation { done in
             DispatchQueue.global().async {
                 let process = Process()
@@ -66,18 +66,18 @@ enum CLI {
                 // Apps start with a bare PATH; git and the harness CLIs live in these.
                 process.environment = ["HOME": home,
                                        "PATH": "\(home)/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"]
-                let errors = Pipe()
-                process.standardError = errors
-                process.standardOutput = FileHandle.nullDevice
+                let output = Pipe()
+                process.standardOutput = output
+                process.standardError = output
                 do {
                     try process.run()
                 } catch {
-                    return done.resume(returning: error.localizedDescription)
+                    return done.resume(returning: (false, error.localizedDescription))
                 }
-                let output = String(decoding: errors.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+                let text = String(decoding: output.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
                 process.waitUntilExit()
-                done.resume(returning: process.terminationStatus == 0 ? nil
-                            : output.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "cairn: ", with: ""))
+                done.resume(returning: (process.terminationStatus == 0,
+                                        text.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "cairn: ", with: "")))
             }
         }
     }

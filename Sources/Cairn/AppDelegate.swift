@@ -8,6 +8,7 @@ import SwiftUI
 @MainActor
 final class AppDelegate: MenuBarAppDelegate {
     private let monitor = Monitor()
+    private var updating = false
 
     override func start() {
         monitor.onChange = { [weak self] in self?.updateIcon() }
@@ -41,10 +42,6 @@ final class AppDelegate: MenuBarAppDelegate {
                 menu.addItem("Start Local Server") { [weak self] in self?.cairn("service", "start") }
             }
         }
-        let installed = monitor.serviceInstalled
-        menu.addItem("Start Local Server at Login") { [weak self] in
-            self?.cairn("service", installed ? "uninstall" : "install")
-        }.state = installed ? .on : .off
         if monitor.gitEnabled, monitor.local.reachable {
             menu.addItem("Push Git Mirror Now") { [weak self] in self?.cairn("git", "push") }
         }
@@ -54,6 +51,9 @@ final class AppDelegate: MenuBarAppDelegate {
         if monitor.blocked {
             menu.addItem("Allow in Login Items…") { SMAppService.openSystemSettingsLoginItems() }
         }
+        menu.addItem(updating ? "Updating Server and CLI…" : "Update Server and CLI") { [weak self] in
+            self?.updateServer()
+        }.isEnabled = !updating
     }
 
     override func makeSettingsView() -> AnyView {
@@ -75,10 +75,22 @@ final class AppDelegate: MenuBarAppDelegate {
 
     private func cairn(_ args: String...) {
         Task {
-            if let problem = await CLI.run(args) {
-                show(problem)
-            }
+            let result = await CLI.run(args)
+            if !result.ok { show(result.output) }
             monitor.poke()
+        }
+    }
+
+    /// `cairn upgrade`: the CLI and the local server are one package, so this updates both.
+    private func updateServer() {
+        updating = true
+        Task {
+            let result = await CLI.run(["upgrade"])
+            updating = false
+            monitor.poke()
+            show(!result.ok ? "The update failed:\n\(result.output)"
+                 : result.output.contains("Nothing to upgrade") ? "The server and CLI are already up to date."
+                 : "Updated the server and CLI to the latest on GitHub. New agent sessions pick up the change.")
         }
     }
 
