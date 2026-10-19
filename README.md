@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/VedAtal/cairn/main/install.sh | sh
 Then the app:
 
 ```sh
-~/projects/cairn-mac/setup.sh
+git clone https://github.com/VedAtal/cairn-mac.git && cairn-mac/setup.sh
 ```
 
 That one command does everything:
@@ -31,6 +31,8 @@ That one command does everything:
    [why](https://github.com/VedAtal/swift-app-kit#how-setupsh-fits-together)).
 4. Builds Cairn and installs it to `~/Applications/Cairn.app`.
 5. Launches it and sets it to start at login.
+
+From the cloned folder, `setup.sh` also takes:
 
 | Command | Installs |
 |---|---|
@@ -92,7 +94,7 @@ Below that is **Launch at login**, for the app itself.
 ## Uninstall
 
 ```sh
-~/projects/cairn-mac/setup.sh --uninstall
+~/Applications/Cairn.app/Contents/Resources/setup.sh --uninstall
 ```
 
 This removes the app, its settings, the login item, and the signing certificate. It leaves Cairn
