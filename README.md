@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/VedAtal/cairn/main/install.sh | sh
 Then the app:
 
 ```sh
-git clone https://github.com/VedAtal/cairn-mac.git && cairn-mac/setup.sh
+curl -fsSL https://raw.githubusercontent.com/VedAtal/swift-app-kit/main/scripts/install.sh | bash -s cairn-mac
 ```
 
 That one command does everything:
@@ -29,10 +29,11 @@ That one command does everything:
    my other menu bar apps.
 3. Creates a local code-signing certificate (first run only, see
    [why](https://github.com/VedAtal/swift-app-kit#how-setupsh-fits-together)).
-4. Builds Cairn and installs it to `~/Applications/Cairn.app`.
+4. Builds Cairn and installs it to `~/Applications/Cairn.app`, then deletes the download.
 5. Launches it and sets it to start at login.
 
-From the cloned folder, `setup.sh` also takes:
+To work on Cairn, clone the repo (`git clone https://github.com/VedAtal/cairn-mac.git`). Its
+`setup.sh` takes:
 
 | Command | Installs |
 |---|---|
@@ -43,7 +44,7 @@ From the cloned folder, `setup.sh` also takes:
 
 ### Updating
 
-**To the latest on GitHub:** click **Update Cairn** in the menu bar menu, or run `./setup.sh`.
+**To the latest on GitHub:** click **Update Cairn** in the menu bar menu, or run `./setup.sh` in a clone.
 This updates the app only. Update Cairn itself with `cairn upgrade`.
 
 **To try local changes before pushing them:** run `./setup.sh --local`.
