@@ -3,7 +3,7 @@ import ServiceManagement
 import SwiftAppKit
 import SwiftUI
 
-/// Cairn's parts on top of SwiftAppKit's standard menu bar app (menu, Settings, updates,
+/// Cairn's parts on top of SwiftAppKit's standard menu bar app (panel, menu, Settings, updates,
 /// launch at login). The cairn CLI owns the server; this only shows it and calls the CLI.
 @MainActor
 final class AppDelegate: MenuBarAppDelegate {
@@ -15,56 +15,27 @@ final class AppDelegate: MenuBarAppDelegate {
         monitor.start()
     }
 
-    override func addMenuItems(to menu: NSMenu) {
-        addStatus("Local", monitor.local, to: menu)
-        addStatus(monitor.teamTitle, monitor.team, to: menu)
-        menu.addItem(.separator())
-
-        if let client = monitor.localClient, monitor.local.reachable {
-            menu.addItem("Open Local UI") { [weak self] in self?.openUI(client) }
-        }
-        if let client = monitor.teamClient, monitor.team.reachable {
-            menu.addItem("Open Team UI") { [weak self] in self?.openUI(client) }
-        }
-        guard CLI.path != nil else {
-            menu.addItem("Copy Install Command") {
+    override func makePanelView() -> AnyView? {
+        // Each action closes the panel first: some end in an alert, or open the browser.
+        AnyView(PanelView(monitor: monitor, updating: updating) { [weak self] action in
+            guard let self else { return }
+            closePanel()
+            switch action {
+            case .openUI(let client): openUI(client)
+            case .copyInstallCommand:
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(Config.installCommand, forType: .string)
+            case .service(let command): cairn("service", command)
+            case .pushGit: cairn("git", "push")
+            case .openLog: NSWorkspace.shared.open(Config.serverLog)
+            case .allowInLoginItems: SMAppService.openSystemSettingsLoginItems()
+            case .update: updateServer()
             }
-            return
-        }
-        guard monitor.local.configured else { return }
-        if monitor.serviceInstalled {
-            if monitor.local.reachable {
-                menu.addItem("Restart Local Server") { [weak self] in self?.cairn("service", "restart") }
-                menu.addItem("Stop Local Server") { [weak self] in self?.cairn("service", "stop") }
-            } else if !monitor.blocked {
-                menu.addItem("Start Local Server") { [weak self] in self?.cairn("service", "start") }
-            }
-        }
-        if monitor.gitEnabled, monitor.local.reachable {
-            menu.addItem("Push Git Mirror Now") { [weak self] in self?.cairn("git", "push") }
-        }
-        if FileManager.default.fileExists(atPath: Config.serverLog.path) {
-            menu.addItem("Open Server Log") { NSWorkspace.shared.open(Config.serverLog) }
-        }
-        if monitor.blocked {
-            menu.addItem("Allow in Login Items…") { SMAppService.openSystemSettingsLoginItems() }
-        }
-        menu.addItem(updating ? "Updating Server and CLI…" : "Update Server and CLI") { [weak self] in
-            self?.updateServer()
-        }.isEnabled = !updating
+        })
     }
 
     override func makeSettingsView() -> AnyView {
         AnyView(SettingsView(monitor: monitor))
-    }
-
-    private func addStatus(_ name: String, _ status: StoreStatus, to menu: NSMenu) {
-        menu.addDisabledItem("\(name): \(status.line)")
-        if let detail = status.detail {
-            menu.addDisabledItem(detail).indentationLevel = 1
-        }
     }
 
     /// Dimmed while a store that's set up can't be reached, or when nothing is set up.

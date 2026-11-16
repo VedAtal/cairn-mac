@@ -44,43 +44,35 @@ To work on Cairn, clone the repo (`git clone https://github.com/VedAtal/cairn-ma
 
 ### Updating
 
-**To the latest on GitHub:** click **Update Cairn** in the menu bar menu, or run `./setup.sh` in a clone.
+**To the latest on GitHub:** click **Update Cairn** in the menu (right-click the stones, or **⋯** in the panel), or run `./setup.sh` in a clone.
 This updates the app only. Update Cairn itself with `cairn upgrade`.
 
 **To try local changes before pushing them:** run `./setup.sh --local`.
 
 ## Using it
 
-Click the **stacked stones** in the menu bar:
+Click the **stacked stones** in the menu bar for the panel:
 
-```
-Local: Running · v0.1.0
-    42 entries · 1 project · git pushed 2 min ago
-Team acme: Connected · v0.1.0
-    318 entries · 6 projects · cairn.acme.dev
-───────────
-Open Local UI
-Open Team UI
-Restart Local Server
-Stop Local Server
-Push Git Mirror Now
-Open Server Log
-Update Server and CLI
-```
+- **Stores**: a card each for **Local** and **Team**, with a dot that's green while it's reachable,
+  its status, what it holds, and **Open**, which opens its web UI already logged in, like `cairn ui`.
+- **Local Server**: **Restart** and **Stop**, or **Start**, then **Push Git Mirror**, **Server Log**
+  and **Update**.
+
+Details:
 
 - **Local** and **Team** always show. One you haven't set up says **Not configured**; set it up
   with `cairn local enable` or `cairn remote add`.
-- **Local** can also say **Not running**, **Blocked in Login Items** (then **Allow in Login
-  Items…** appears), or that something else holds its port.
+- **Local** can also say **Not running**, **Blocked in Login Items** (then **Allow at Login…**
+  appears), or that something else holds its port.
 - **Team** can also say **Unreachable** or **API key rejected**.
-- **Open Local UI** and **Open Team UI** open the web UI, already logged in, like `cairn ui`.
-- **Restart**, **Stop**, and **Start Local Server** run `cairn service restart`, `stop`, and `start`.
-  A stopped server starts again with the next agent session, or at login.
-- **Update Server and CLI** runs `cairn upgrade`: the CLI and the local server are one package,
-  so it updates both and restarts the server. The menu's **Update Cairn** updates this app.
-- **Push Git Mirror Now** shows when git mode is on (`cairn git enable`).
+- **Restart**, **Stop**, and **Start** run `cairn service restart`, `stop`, and `start`. A stopped
+  server starts again with the next agent session, or at login.
+- **Update** runs `cairn upgrade`: the CLI and the local server are one package, so it updates both
+  and restarts the server. **Update Cairn** in the menu (right-click the icon, or **⋯** in the
+  panel) updates this app.
+- **Push Git Mirror** shows when git mode is on (`cairn git enable`).
 - The icon dims while a store you've set up can't be reached.
-- If the `cairn` command isn't installed, the menu offers **Copy Install Command** instead.
+- If the `cairn` command isn't installed, the panel offers **Copy Install Command** instead.
 
 ### Without the app
 
@@ -117,13 +109,14 @@ icon is probably hidden behind the camera notch or disallowed in System Settings
 ## How it works
 
 Cairn for Mac is built on [swift-app-kit](https://github.com/VedAtal/swift-app-kit), which provides
-the parts my menu bar apps share: the install script, the menu's standard items, the Settings
+the parts my menu bar apps share: the install script, the panel's frame and the standard menu, the Settings
 window layout, launch at login, and updates. This repo holds only what's specific to Cairn:
 
 ```
 Sources/Cairn/
 ├── main.swift           Starts the app through swift-app-kit
-├── AppDelegate.swift    The menu: status lines and the commands, which run the cairn CLI
+├── AppDelegate.swift    Carries out the panel's commands, which run the cairn CLI
+├── PanelView.swift      The panel: each store's status, the local server's controls
 ├── Monitor.swift        Checks the local server every 5 s and the team server every minute
 ├── Server.swift         Reads ~/.cairn, runs the cairn command, and talks to the REST API
 └── SettingsView.swift   Cairn's section of the Settings window

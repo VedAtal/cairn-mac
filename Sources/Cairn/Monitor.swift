@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import ServiceManagement
 
-/// One store's status, as the menu and Settings show it.
+/// One store's status, as the panel and Settings show it.
 struct StoreStatus {
     var configured = false
     var reachable = false
